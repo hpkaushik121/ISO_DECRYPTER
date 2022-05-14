@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="crimson-1.1.3">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/crimson-1.1.3.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/j8583-1.8.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/jpos.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/logback.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/logback-core-0.9.6.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/slf4j.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
