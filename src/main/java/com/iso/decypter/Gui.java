@@ -24,7 +24,7 @@ public class Gui extends JFrame {
     private static final String DEFAULT_FILE_MASK = Const.EMPTY_STRING;
 
     private JMenuItem menuItemExit;
-    private JMenuItem menuItemBrowse;
+    private JMenuItem menuItemAdmin;
     private JMenuItem menuItemSetDirectory;
     private JMenuItem menuItemDefault;
     private JMenuItem menuItemSetFileMask;
@@ -34,7 +34,7 @@ public class Gui extends JFrame {
 
     private JLabel directoryLabelValue;
     private JLabel fileMaskLabelValue;
-
+    private JRadioButton isJ8583,isISO8583;
     private JButton copyButton;
     private JButton setDirectoryButton;
     private JButton defaultButton;
@@ -43,6 +43,13 @@ public class Gui extends JFrame {
 
     private JTextArea resultTextArea;
     private JTextArea inputByteArray;
+
+    private JLabel password1, label;
+    private JTextField username;
+    private JButton button;
+    private JPasswordField Password;
+    private JPanel loginPanel=new JPanel();
+    private JFrame loginFrame=new JFrame();
 
     private class MenuItemsButtonsListener implements ActionListener {
         @Override
@@ -57,7 +64,7 @@ public class Gui extends JFrame {
                 aboutApplication();
             }
 
-            if ( (source == menuItemBrowse)) {
+            if ( (source == menuItemAdmin)) {
                 browseDirectories();
             }
             if(source == copyButton){
@@ -138,20 +145,29 @@ public class Gui extends JFrame {
     }
 
     private void browseDirectories() {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle(browseDirectoriesGetTitle());
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        fileChooser.setAcceptAllFileFilterUsed(false);
 
-        String directoryName = directoryLabelValue.getText();
-        File directory = new File(directoryName);
-        fileChooser.setCurrentDirectory(directory);
 
-        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            directory = fileChooser.getSelectedFile();
-            directoryName = directory.getPath();
-            directoryLabelValue.setText(directoryName);
-        }
+//        frame.setLocationByPlatform(true);
+        loginFrame.setVisible(true);
+        loginFrame.setResizable(true);
+        username.requestFocus();
+
+
+
+//        JFileChooser fileChooser = new JFileChooser();
+//        fileChooser.setDialogTitle(browseDirectoriesGetTitle());
+//        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+//        fileChooser.setAcceptAllFileFilterUsed(false);
+//
+//        String directoryName = directoryLabelValue.getText();
+//        File directory = new File(directoryName);
+//        fileChooser.setCurrentDirectory(directory);
+//
+//        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+//            directory = fileChooser.getSelectedFile();
+//            directoryName = directory.getPath();
+//            directoryLabelValue.setText(directoryName);
+//        }
     }
 
     private String settingDirectoryGetTitle() {
@@ -224,18 +240,24 @@ public class Gui extends JFrame {
         String[] rs=  inputByteArray.getText().replace("[","").replace("]","").split(",");
 
 
-        try {
-            byte[] bytes=new byte[rs.length-2];
+        if(isISO8583.isSelected()) {
+            try {
+                byte[] bytes=new byte[rs.length-2];
 
-            for (int i=2; i<rs.length;i++) {
-                bytes[i-2]= Byte.parseByte(rs[i]);
-            }
+                for (int i=2; i<rs.length;i++) {
+                    bytes[i-2]= Byte.parseByte(rs[i]);
+                }
 
-            String byteArray = new String(bytes);
-            String decrypted= new UnPackISOMessage().unPackResponseISO8583(bytes);
-            resultTextArea.setText(decrypted);
-            resultTextArea.setCaretPosition(0);
-        } catch (Throwable e) {
+                String byteArray = new String(bytes);
+                String decrypted= new UnPackISOMessage().unPackResponseISO8583(bytes);
+                resultTextArea.setText(decrypted);
+                resultTextArea.setCaretPosition(0);
+            }catch (Throwable ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "Error!!!", JOptionPane.ERROR_MESSAGE);
+        }
+
+        } else  {
             try{
                 byte[] bytes=new byte[rs.length];
 
@@ -249,10 +271,9 @@ public class Gui extends JFrame {
                 resultTextArea.setCaretPosition(0);
             }catch (Throwable ex){
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, e.getMessage(), "Error!!!", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error!!!", JOptionPane.ERROR_MESSAGE);
             }
 
-            e.printStackTrace();
 
         }
 
@@ -303,17 +324,21 @@ public class Gui extends JFrame {
         menuItemExit.setIcon(Icons.getResource("/ico/exit.png"));
         menuItemExit.addActionListener(menuItemsListener);
 
+
+
+        // Run menu items
+        menuItemAdmin = new JMenuItem("Admin Login");
+        menuItemAdmin.setToolTipText(browseDirectoriesGetTitle());
+        menuItemAdmin.setMnemonic(KeyEvent.VK_B);
+        menuItemAdmin.setIcon(Icons.getResource("/ico/about.png"));
+        menuItemAdmin.addActionListener(menuItemsListener);
+
         JMenu menuFile = new JMenu("File");
         menuFile.setMnemonic(KeyEvent.VK_F);
         menuFile.setIcon(Icons.getResource("/ico/file.png"));
+        menuFile.add(menuItemAdmin);
         menuFile.add(menuItemExit);
 
-        // Run menu items
-//        menuItemBrowse = new JMenuItem("Browse directory");
-//        menuItemBrowse.setToolTipText(browseDirectoriesGetTitle());
-//        menuItemBrowse.setMnemonic(KeyEvent.VK_B);
-//        menuItemBrowse.setIcon(Icons.getResource("/ico/browse.png"));
-//        menuItemBrowse.addActionListener(menuItemsListener);
 //
 //        menuItemSetDirectory = new JMenuItem("Set directory");
 //        menuItemSetDirectory.setToolTipText(settingDirectoryGetTitle());
@@ -399,11 +424,25 @@ public class Gui extends JFrame {
         copyButton.setIcon(Icons.getResource("/ico/copy.png"));
         copyButton.addActionListener(buttonsListener);
 //
-//        setDirectoryButton = new JButton("Set");
-//        setDirectoryButton.setToolTipText(settingDirectoryGetTitle());
-//        setDirectoryButton.setMnemonic(KeyEvent.VK_S);
-//        setDirectoryButton.setIcon(Icons.getResource("/ico/set.png"));
-//        setDirectoryButton.addActionListener(buttonsListener);
+         isJ8583 = new JRadioButton("J8583");
+        isJ8583.setToolTipText(settingDirectoryGetTitle());
+        isJ8583.setMnemonic(KeyEvent.VK_S);
+        isJ8583.setSelected(true);
+         isISO8583 = new JRadioButton("ISO8583");
+        isISO8583.setToolTipText(settingDirectoryGetTitle());
+        isISO8583.setMnemonic(KeyEvent.VK_S);
+
+        ButtonGroup buttonGroup=new ButtonGroup();
+        buttonGroup.add(isJ8583);
+        buttonGroup.add(isISO8583);
+        Container radioGroup = Box.createHorizontalBox();
+        radioGroup.add(Box.createRigidArea(gapInner));
+        radioGroup.add(Box.createHorizontalGlue());
+        radioGroup.add(isJ8583);
+        radioGroup.add(isISO8583);
+
+
+
 
         Container directory = Box.createHorizontalBox();
         directory.add(directoryLabel);
@@ -466,6 +505,74 @@ public class Gui extends JFrame {
         JScrollPane resultScrollPane = new JScrollPane(resultTextArea);
 
 
+
+
+
+
+
+        loginPanel.setLayout(null);
+        loginPanel.setOpaque(true);
+        loginFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        try
+        {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        loginFrame.setTitle("Admin Login");
+        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (int) ((dimension.getWidth() - loginFrame.getWidth()) / 2.6);
+        int y = (int) ((dimension.getHeight() - loginFrame.getHeight()) / 2.6);
+        loginFrame.setLocation(new Point(x, y));
+        loginFrame.add(loginPanel);
+        loginFrame.setSize(new Dimension(400, 200));
+
+        // Username label constructor
+        label = new JLabel("Username");
+        label.setBounds(100, 8, 70, 20);
+        loginPanel.add(label);
+
+
+        // Username TextField constructor
+        username = new JTextField();
+        username.setBounds(100, 27, 198, 20);
+        loginPanel.add(username);
+
+
+        // Password Label constructor
+        password1 = new JLabel("Password");
+        password1.setBounds(100, 55, 70, 20);
+        loginPanel.add(password1);
+
+
+
+        // Password TextField
+        Password = new JPasswordField();
+        Password.setBounds(100, 75, 198, 20);
+        loginPanel.add(Password);
+
+
+        // Button constructor
+        button = new JButton("Login");
+        button.setBounds(100, 110, 198, 25);
+//        button.setForeground(Color.WHITE);
+//        button.setBackground(Color.BLACK);
+        button.addActionListener(v->{
+            if(username.getText().equals("admin") && Password.getText().equals("admin@123")){
+                Const.isAdmin=true;
+                JOptionPane.showMessageDialog(loginFrame, "Admin mode enabled","Admin", JOptionPane.INFORMATION_MESSAGE);
+                loginFrame.dispose();
+            }else{
+                JOptionPane.showMessageDialog(loginFrame, "Invalid Username or password","Error!!", JOptionPane.ERROR_MESSAGE);
+            }
+
+        });
+        loginPanel.add(button);
+
+//        frame.getContentPane().add(BorderLayout.CENTER, panel);
+//        loginFrame.pack();
+
+
         inputByteArray = new JTextArea(90, 300);
         inputByteArray.setEditable(true);
         inputByteArray.setLineWrap(true);
@@ -475,13 +582,13 @@ public class Gui extends JFrame {
         // final panel
         JPanel panel = new JPanel();
 
-        Border panelBorder = BorderFactory.createEmptyBorder(GAP_BORDER, GAP_BORDER, GAP_BORDER, GAP_BORDER);
-        panel.setBorder(panelBorder);
+        Border mainPanelBorder = BorderFactory.createEmptyBorder(GAP_BORDER, GAP_BORDER, GAP_BORDER, GAP_BORDER);
+        panel.setBorder(mainPanelBorder);
 
 
-        BoxLayout panelLayout = new BoxLayout(panel, BoxLayout.PAGE_AXIS);
-        panel.setLayout(panelLayout);
-
+        BoxLayout mainPanelLayout = new BoxLayout(panel, BoxLayout.PAGE_AXIS);
+        panel.setLayout(mainPanelLayout);
+        panel.add(radioGroup);
         panel.add(directory);
         panel.add(Box.createRigidArea(gapInner));
         panel.add(inputScrollPane);
@@ -498,6 +605,12 @@ public class Gui extends JFrame {
 
         // final container
         Container container = getContentPane();
+        try
+        {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         container.add(panel);
     }
 
