@@ -113,8 +113,8 @@ byte[] rs= {48,50,48,48,70,50,51,67,52,54,68,49,50,57,69,48,56,50,48,48,48,48,48
 
     }
 
-    public   String unPackResponseJ8583(String responsePacket) throws Exception {
-    	IsoMessage m;
+    public   IsoMessage unPackResponseJ8583(String responsePacket) throws Exception {
+
 
         	URL url= Icons.getResourceURL("/ico/j8583Config.xml");
         	MessageFactory mf = new MessageFactory();
@@ -123,14 +123,20 @@ byte[] rs= {48,50,48,48,70,50,51,67,52,54,68,49,50,57,69,48,56,50,48,48,48,48,48
             System.out.println("data = " + data);
 //           data = data.substring(1, data.length());
             System.out.println("data = " + data);
-             m = mf.parseMessage(data.getBytes(),0);
+        IsoMessage m = mf.parseMessage(data.getBytes(),0);
 
 
-        return logISOMsg(m);
+        return m;
 
     }
+    public String IsoToString(IsoMessage isoMessage){
+       return logISOMsg(isoMessage);
+    }
+    public String IsoToString(ISOMsg isoM) throws ISOException {
+        return logISOMsg(isoM);
+    }
     
-    public String unPackResponseISO8583(byte[] responsePacket) throws ISOException {
+    public ISOMsg unPackResponseISO8583(byte[] responsePacket) throws ISOException {
         ISOMsg isoMsg = null;
             GenericPackager packager = new GenericPackager(Icons.getResourceStream("/ico/iso87ascii.xml"));
 
@@ -146,7 +152,7 @@ byte[] rs= {48,50,48,48,70,50,51,67,52,54,68,49,50,57,69,48,56,50,48,48,48,48,48
         	
 
 
-        return logISOMsg(isoMsg);
+        return isoMsg;
 
     }
     
